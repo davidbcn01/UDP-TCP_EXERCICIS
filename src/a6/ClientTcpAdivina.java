@@ -1,12 +1,11 @@
 package a6;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,7 +17,10 @@ public class ClientTcpAdivina extends Thread {
 	int port;
 	boolean continueConnected;
 	int intents;
-	
+	Llista serverData;
+	List<Integer> numClient = new ArrayList<>();
+
+	Llista request = new Llista("David",numClient);
 	public ClientTcpAdivina(String hostname, int port) {
 		this.hostname = hostname;
 		this.port = port;
@@ -27,38 +29,49 @@ public class ClientTcpAdivina extends Thread {
 	}
 
 	public void run() {
-		String serverData;
-		String request;
-		
+
+		numClient.add(2);
+		numClient.add(6);
+		numClient.add(1);
+		numClient.add(10);
+		numClient.add(10);
+		numClient.add(2);
+
 		Socket socket;
-		BufferedReader in;
-		PrintStream out;
+
+		ObjectInputStream in;
+		ObjectOutputStream out;
 		
 		try {
 			socket = new Socket(InetAddress.getByName(hostname), port);
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			out = new PrintStream(socket.getOutputStream());
+			in = new ObjectInputStream(socket.getInputStream());
+			out = new ObjectOutputStream(socket.getOutputStream());
 			//el client atén el port fins que decideix finalitzar
 			while(continueConnected){
-				serverData = in.readLine();
-				//processament de les dades rebudes i obtenció d'una nova petició
-				request = getRequest(serverData);
-				//enviament el número i els intents
-				out.println(request);
-				out.println(intents);
+
+				out.writeObject(request);
 				out.flush();
+
+				serverData = (Llista) in.readObject();
+				System.out.println(serverData);
+
+				//processament de les dades rebudes i obtenció d'una nova petició
+
+				//enviament el número i els intents
+
+
 				
 			}
 		 	close(socket);
 		} catch (UnknownHostException ex) {
 			System.out.println("Error de connexió. No existeix el host: " + ex.getMessage());
-		} catch (IOException ex) {
+		} catch (IOException | ClassNotFoundException ex) {
 			System.out.println("Error de connexió indefinit: " + ex.getMessage());
 		}
 		
 	}
 	
-	public String getRequest(String serverData) {
+	/*public String getRequest(Llista serverData) {
 		String ret;
 		System.out.println(serverData);
 		if( serverData.equals("Correcte") ) {
@@ -74,7 +87,7 @@ public class ClientTcpAdivina extends Thread {
 		return ret;
 		
 	}
-	
+	*/
 	public boolean mustFinish(String dades) {
 		if (dades.equals("exit")) return false;
 		return true;

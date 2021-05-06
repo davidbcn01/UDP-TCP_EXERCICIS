@@ -8,7 +8,16 @@ public class Llista implements Serializable {
     private String nom;
     private List<Integer> numberList;
 
+    @Override
+    public String toString() {
+        return "Llista{" +
+                "nom='" + nom + '\'' +
+                ", numberList=" + numberList +
+                '}';
+    }
+
     public Llista(String nom, List<Integer> numberList) {
+        this.nom = nom;
         this.numberList = numberList;
     }
 
